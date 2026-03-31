@@ -43,5 +43,5 @@ initDb();
 const port = Number(process.env.PORT || 3000);
 
 app.listen(port, () => {
-  console.log(`GameGrid ruleaza la http://localhost:${port}`);
+  console.log(`GameGrid va rula la http://localhost:${port}`);
 });
