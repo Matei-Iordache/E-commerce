@@ -10,14 +10,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATA_DIR
-        value: /var/data
+        value: /tmp/gamegrid-data
       - key: APP_BASE_URL
         sync: false
       - key: SESSION_SECRET
         generateValue: true
       - key: STRIPE_SECRET_KEY
         sync: false
-    disk:
-      name: gamegrid-data
-      mountPath: /var/data
-      sizeGB: 1
