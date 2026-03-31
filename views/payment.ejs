@@ -4,11 +4,11 @@
   <div class="card">
     <p class="eyebrow">Plata electronica</p>
     <h1>Achita comanda <%= order.code %></h1>
-    <p>Plateste securizat cu Stripe pentru carduri reale sau foloseste sandbox-ul demo pentru testare.</p>
+    <p>Plata este procesata securizat prin Stripe Checkout.</p>
 
     <% if (stripeEnabled) { %>
       <div class="notice-box">
-        <strong>Plata reala cu card (Stripe)</strong>
+        <strong>Plata cu card (Stripe)</strong>
         <p>Checkout securizat gazduit de Stripe. Datele cardului nu sunt procesate direct in aplicatie.</p>
         <form action="/checkout/<%= order.code %>/payment/stripe-session" method="post" class="stack-form">
           <button type="submit" class="button">Plateste securizat <%= formatMoney(order.total_cents) %></button>
@@ -16,41 +16,10 @@
       </div>
     <% } else { %>
       <div class="notice-box">
-        <strong>Stripe neconfigurat</strong>
-        <p>Seteaza variabila de mediu STRIPE_SECRET_KEY pentru a activa plata cu carduri reale.</p>
+        <strong>Plata este indisponibila momentan</strong>
+        <p>Te rugam sa incerci din nou mai tarziu.</p>
       </div>
     <% } %>
-
-    <div class="notice-box">
-      <strong>Carduri de test acceptate (sandbox intern)</strong>
-      <% Object.entries(acceptedCards).forEach(([number, label]) => { %>
-        <p><%= number.replace(/(\d{4})(?=\d)/g, '$1 ') %> - <%= label %></p>
-      <% }) %>
-      <p>Expirare exemplu: 12/30 - CVV: 123</p>
-    </div>
-
-    <p class="eyebrow">Fallback demo</p>
-    <form action="/checkout/<%= order.code %>/payment" method="post" class="stack-form">
-      <label>
-        Nume titular
-        <input type="text" name="cardholder" required />
-      </label>
-      <label>
-        Numar card
-        <input type="text" name="cardNumber" inputmode="numeric" placeholder="4242 4242 4242 4242" required />
-      </label>
-      <div class="form-row">
-        <label>
-          Expirare
-          <input type="text" name="expiry" placeholder="12/30" required />
-        </label>
-        <label>
-          CVV
-          <input type="text" name="cvv" inputmode="numeric" placeholder="123" required />
-        </label>
-      </div>
-      <button type="submit" class="button">Plateste <%= formatMoney(order.total_cents) %></button>
-    </form>
   </div>
 
   <aside class="card summary-card">

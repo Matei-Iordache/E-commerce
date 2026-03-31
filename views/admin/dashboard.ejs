@@ -25,12 +25,55 @@
     <span>Venit incasat</span>
     <strong><%= formatMoney(stats.revenueCents) %></strong>
   </article>
+  <article class="card stat-card">
+    <span>Comanda medie</span>
+    <strong><%= formatMoney(stats.averageOrderCents) %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Unitati in stoc</span>
+    <strong><%= stats.totalStockUnits %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Valoare stoc</span>
+    <strong><%= formatMoney(stats.inventoryValueCents) %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Stoc redus / epuizat</span>
+    <strong><%= stats.lowStockProducts %> / <%= stats.outOfStockProducts %></strong>
+  </article>
 </section>
 
 <section class="admin-links">
   <a class="button" href="/admin/products">Produse</a>
   <a class="button button--secondary" href="/admin/orders">Comenzi</a>
   <a class="button button--secondary" href="/admin/users">Utilizatori</a>
+</section>
+
+<section class="grid grid--stats">
+  <article class="card stat-card">
+    <span>Comenzi platite</span>
+    <strong><%= stats.paidOrders %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Comenzi neplatite</span>
+    <strong><%= stats.unpaidOrders %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Inregistrate</span>
+    <strong><%= stats.registeredOrders %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>In procesare</span>
+    <strong><%= stats.processingOrders %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Expediate</span>
+    <strong><%= stats.shippedOrders %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Finalizate</span>
+    <strong><%= stats.completedOrders %></strong>
+  </article>
 </section>
 
 <section class="card">
@@ -59,6 +102,100 @@
       </tbody>
     </table>
   </div>
+</section>
+
+<section class="two-column two-column--admin">
+  <div class="card">
+    <h2>Produse cu stoc redus</h2>
+    <% if (!lowStockItems.length) { %>
+      <p>Toate produsele au stoc suficient.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Produs</th>
+              <th>Categorie</th>
+              <th>Stoc</th>
+              <th>Pret</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% lowStockItems.forEach((product) => { %>
+              <tr>
+                <td><%= product.name %></td>
+                <td><%= product.category_name %></td>
+                <td><%= product.stock %></td>
+                <td><%= formatMoney(product.price_cents) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card">
+    <h2>Top produse vandute</h2>
+    <% if (!topSellingProducts.length) { %>
+      <p>Nu exista inca istoric de vanzari.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Produs</th>
+              <th>Unitati</th>
+              <th>Valoare</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% topSellingProducts.forEach((product) => { %>
+              <tr>
+                <td><%= product.name %></td>
+                <td><%= product.sold_units %></td>
+                <td><%= formatMoney(product.sold_value_cents) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Plati recente</h2>
+  <% if (!recentPayments.length) { %>
+    <p>Nu exista inca tranzactii inregistrate.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Referinta</th>
+            <th>Comanda</th>
+            <th>Client</th>
+            <th>Gateway</th>
+            <th>Suma</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recentPayments.forEach((payment) => { %>
+            <tr>
+              <td><%= payment.transaction_ref %></td>
+              <td><%= payment.order_code %></td>
+              <td><%= payment.user_name %></td>
+              <td><%= payment.gateway %></td>
+              <td><%= formatMoney(payment.amount_cents) %></td>
+              <td><%= payment.status %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
 </section>
 
 <%- include('../partials/footer') %>

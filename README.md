@@ -22,24 +22,11 @@ npm start
 http://localhost:3000
 ```
 
-## Conturi demo
+## Plata cu cardul (Stripe)
 
-- Client: `client@gamegrid.ro` / `client123`
-- Admin: `admin@gamegrid.ro` / `admin123`
+Configureaza variabilele:
 
-## Carduri de test pentru plata sandbox
-
-- `4242 4242 4242 4242`
-- `5555 5555 5555 4444`
-- `4000 0000 0000 3220`
-
-Expirare exemplu: `12/30`, CVV: `123`
-
-## Plata cu carduri reale (Stripe)
-
-Pentru plati reale, configureaza variabile de mediu:
-
-- `STRIPE_SECRET_KEY` = cheia secreta Stripe (live sau test)
+- `STRIPE_SECRET_KEY` = cheia secreta Stripe
 - `APP_BASE_URL` = URL-ul public al aplicatiei (ex: `https://gamegrid.example.com`)
 
 Exemplu PowerShell:
@@ -62,7 +49,7 @@ In pagina de plata vei avea butonul `Plateste securizat` care redirectioneaza ca
 - inregistrare comanda
 - stocuri si promotii
 - factura HTML
-- plata electronica demo de tip sandbox
+- plata electronica cu Stripe Checkout
 - administrare produse, utilizatori si comenzi
 - modul original: `Loadout Personalizat`
 
@@ -81,4 +68,18 @@ Tabele:
 
 ## Publicare
 
-Aplicatia este pregatita pentru rulare pe orice hosting Node.js care permite persistenta unui fisier SQLite sau conectarea la o baza MySQL/SQLite separata. Dupa publicare, URL-ul public se trece in raportul din `docs/raport.md`.
+### GitHub Pages (pagina proiect)
+
+Repository-ul include workflow-ul `.github/workflows/deploy-pages.yml` care publica folderul `docs/` pe GitHub Pages.
+
+Pasii:
+
+1. Urca codul pe GitHub in branch-ul `main`.
+2. In GitHub: **Settings -> Pages -> Build and deployment -> Source: GitHub Actions**.
+3. Ruleaza workflow-ul `Deploy GitHub Pages` (automat la push pe `main` sau manual).
+4. Pagina va fi disponibila la `https://<user>.github.io/<repo>/`.
+
+### Aplicatia completa (backend + DB)
+
+GitHub Pages NU poate rula backend Node.js/Express sau SQLite.
+Pentru aplicatia completa foloseste un hosting Node.js (Render/Railway/Fly.io/VPS).

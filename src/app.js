@@ -20,11 +20,6 @@ const couponDefinitions = {
     minimumSubtotalCents: 12000,
   },
 };
-const acceptedTestCards = {
-  "4242424242424242": "Visa Sandbox",
-  "5555555555554444": "Mastercard Sandbox",
-  "4000000000003220": "3DS Sandbox",
-};
 const stripeSecretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
@@ -447,7 +442,6 @@ app.get("/checkout/:code/payment", requireAuth, (req, res, next) => {
     order,
     items,
     payment,
-    acceptedCards: acceptedTestCards,
     stripeEnabled: Boolean(stripe),
   });
 });
@@ -560,45 +554,6 @@ app.get("/checkout/:code/payment/success", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/checkout/:code/payment", requireAuth, (req, res) => {
-  const order = getOwnedOrder(req.params.code, res.locals.currentUser);
-  if (!order) {
-    return res.redirect("/account");
-  }
-
-  if (order.payment_status === "Platita") {
-    setFlash(req, "success", "Comanda este deja achitata.");
-    return res.redirect(`/orders/${order.code}/invoice`);
-  }
-
-  const cardNumber = String(req.body.cardNumber || "").replace(/\s+/g, "");
-  const cardholder = String(req.body.cardholder || "").trim();
-  const expiry = String(req.body.expiry || "").trim();
-  const cvv = String(req.body.cvv || "").trim();
-
-  if (!acceptedTestCards[cardNumber] || !cardholder || !/^\d{2}\/\d{2}$/.test(expiry) || !/^\d{3,4}$/.test(cvv)) {
-    setFlash(req, "error", "Plata a fost respinsa. Foloseste un card de test valid din lista afisata.");
-    return res.redirect(`/checkout/${order.code}/payment`);
-  }
-
-  const transactionRef = `SBX-${Date.now()}`;
-  db.transaction(() => {
-    db.prepare(`
-      INSERT INTO payments (order_id, gateway, card_last4, amount_cents, status, transaction_ref)
-      VALUES (?, ?, ?, ?, 'captured', ?)
-    `).run(order.id, acceptedTestCards[cardNumber], cardNumber.slice(-4), order.total_cents, transactionRef);
-
-    db.prepare(`
-      UPDATE orders
-      SET payment_status = 'Platita', status = 'In procesare'
-      WHERE id = ?
-    `).run(order.id);
-  })();
-
-  setFlash(req, "success", "Plata demo a fost capturata cu succes.");
-  res.redirect(`/orders/${order.code}/invoice`);
-});
-
 app.get("/orders/:code/invoice", requireAuth, (req, res, next) => {
   const order = getOwnedOrder(req.params.code, res.locals.currentUser);
   if (!order) {
@@ -617,14 +572,70 @@ app.get("/orders/:code/invoice", requireAuth, (req, res, next) => {
 });
 
 app.get("/admin", requireAdmin, (req, res) => {
-  const stats = {
-    orders: db.prepare("SELECT COUNT(*) AS count FROM orders").get().count,
-    users: db.prepare("SELECT COUNT(*) AS count FROM users").get().count,
-    products: db.prepare("SELECT COUNT(*) AS count FROM products").get().count,
-    revenueCents:
-      db.prepare("SELECT COALESCE(SUM(total_cents), 0) AS total FROM orders WHERE payment_status = 'Platita'").get()
-        .total,
-  };
+  const stats = db.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM orders) AS orders,
+      (SELECT COUNT(*) FROM users) AS users,
+      (SELECT COUNT(*) FROM products) AS products,
+      (
+        SELECT COALESCE(SUM(total_cents), 0)
+        FROM orders
+        WHERE payment_status = 'Platita'
+      ) AS revenueCents,
+      (
+        SELECT COALESCE(AVG(total_cents), 0)
+        FROM orders
+        WHERE payment_status = 'Platita'
+      ) AS averageOrderCents,
+      (
+        SELECT COUNT(*)
+        FROM orders
+        WHERE payment_status = 'Platita'
+      ) AS paidOrders,
+      (
+        SELECT COUNT(*)
+        FROM orders
+        WHERE payment_status != 'Platita'
+      ) AS unpaidOrders,
+      (
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = 'Inregistrata'
+      ) AS registeredOrders,
+      (
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = 'In procesare'
+      ) AS processingOrders,
+      (
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = 'Expediata'
+      ) AS shippedOrders,
+      (
+        SELECT COUNT(*)
+        FROM orders
+        WHERE status = 'Finalizata'
+      ) AS completedOrders,
+      (
+        SELECT COUNT(*)
+        FROM products
+        WHERE stock <= 0
+      ) AS outOfStockProducts,
+      (
+        SELECT COUNT(*)
+        FROM products
+        WHERE stock BETWEEN 1 AND 5
+      ) AS lowStockProducts,
+      (
+        SELECT COALESCE(SUM(stock), 0)
+        FROM products
+      ) AS totalStockUnits,
+      (
+        SELECT COALESCE(SUM(stock * price_cents), 0)
+        FROM products
+      ) AS inventoryValueCents
+  `).get();
 
   const recentOrders = db.prepare(`
     SELECT o.*, u.name AS user_name
@@ -634,10 +645,49 @@ app.get("/admin", requireAdmin, (req, res) => {
     LIMIT 6
   `).all();
 
+  const lowStockItems = db.prepare(`
+    SELECT p.id, p.name, p.slug, p.stock, p.price_cents, c.name AS category_name
+    FROM products p
+    JOIN categories c ON c.id = p.category_id
+    WHERE p.stock <= 5
+    ORDER BY p.stock ASC, p.name ASC
+    LIMIT 8
+  `).all();
+
+  const topSellingProducts = db.prepare(`
+    SELECT
+      p.id,
+      p.name,
+      p.slug,
+      COALESCE(SUM(oi.quantity), 0) AS sold_units,
+      COALESCE(SUM(oi.line_total_cents), 0) AS sold_value_cents
+    FROM products p
+    LEFT JOIN order_items oi ON oi.product_id = p.id
+    GROUP BY p.id
+    HAVING COALESCE(SUM(oi.quantity), 0) > 0
+    ORDER BY sold_units DESC, sold_value_cents DESC, p.name ASC
+    LIMIT 8
+  `).all();
+
+  const recentPayments = db.prepare(`
+    SELECT
+      pay.*,
+      ord.code AS order_code,
+      usr.name AS user_name
+    FROM payments pay
+    JOIN orders ord ON ord.id = pay.order_id
+    JOIN users usr ON usr.id = ord.user_id
+    ORDER BY pay.created_at DESC
+    LIMIT 8
+  `).all();
+
   res.render("admin/dashboard", {
     title: "Administrare",
     stats,
     recentOrders,
+    lowStockItems,
+    topSellingProducts,
+    recentPayments,
   });
 });
 
@@ -658,7 +708,8 @@ app.get("/admin/products", requireAdmin, (req, res) => {
 app.post("/admin/products", requireAdmin, (req, res) => {
   const categoryId = Number(req.body.categoryId);
   const name = String(req.body.name || "").trim();
-  const slug = slugify(name);
+  const customSlug = String(req.body.slug || "").trim();
+  const slug = slugify(customSlug || name);
   const tagline = String(req.body.tagline || "").trim();
   const description = String(req.body.description || "").trim();
   const priceCents = Math.round(Number(req.body.price || 0) * 100);
@@ -670,8 +721,15 @@ app.post("/admin/products", requireAdmin, (req, res) => {
   const concern = String(req.body.concern || "general").trim();
   const image = String(req.body.image || "").trim();
 
-  if (!categoryId || !name || !tagline || !description || priceCents <= 0) {
+  const categoryExists = db.prepare("SELECT id FROM categories WHERE id = ?").get(categoryId);
+  if (!categoryExists || !name || !slug || !tagline || !description || priceCents <= 0) {
     setFlash(req, "error", "Completeaza toate campurile obligatorii pentru produs.");
+    return res.redirect("/admin/products");
+  }
+
+  const slugExists = db.prepare("SELECT id FROM products WHERE slug = ?").get(slug);
+  if (slugExists) {
+    setFlash(req, "error", "Slug-ul produsului exista deja. Alege un nume sau slug diferit.");
     return res.redirect("/admin/products");
   }
 
