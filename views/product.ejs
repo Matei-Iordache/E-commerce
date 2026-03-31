@@ -1,0 +1,74 @@
+<%- include('partials/header', { title }) %>
+
+<section class="product-layout">
+  <div class="product-visual product-visual--large texture-<%= product.texture %>" style="--accent:<%= product.accent %>;">
+    <% if (product.image) { %>
+      <img class="product-visual__image" src="<%= product.image %>" alt="<%= product.name %>" loading="eager" />
+    <% } %>
+    <% if (product.promo_percent) { %>
+      <span class="badge">Promo <%= product.promo_percent %>%</span>
+    <% } %>
+    <span class="product-visual__label"><%= product.category_name %></span>
+  </div>
+
+  <div class="card product-details">
+    <p class="eyebrow"><%= product.category_name %></p>
+    <h1><%= product.name %></h1>
+    <p class="lead"><%= product.tagline %></p>
+    <p><%= product.description %></p>
+    <dl class="spec-grid">
+      <div>
+        <dt>Pret</dt>
+        <dd><%= formatMoney(Math.round(product.price_cents * (1 - product.promo_percent / 100))) %></dd>
+      </div>
+      <div>
+        <dt>Stoc</dt>
+        <dd><%= product.stock %> buc.</dd>
+      </div>
+      <div>
+        <dt>Promo</dt>
+        <dd><%= product.promo_percent ? `${product.promo_percent}%` : 'nu' %></dd>
+      </div>
+      <div>
+        <dt>Tag gameplay</dt>
+        <dd><%= product.concern %></dd>
+      </div>
+    </dl>
+    <form action="/cart/add" method="post" class="inline-form inline-form--product">
+      <input type="hidden" name="productId" value="<%= product.id %>" />
+      <input type="hidden" name="redirectTo" value="/products/<%= product.slug %>" />
+      <label>
+        Cantitate
+        <input type="number" name="quantity" value="1" min="1" max="<%= product.stock %>" />
+      </label>
+      <button type="submit" class="button">Adauga in cos</button>
+    </form>
+  </div>
+</section>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Produse similare</p>
+    <h2>Din aceeasi categorie</h2>
+  </div>
+</section>
+
+<section class="grid grid--products">
+  <% relatedProducts.forEach((related) => { %>
+    <article class="product-card">
+        <div class="product-visual texture-<%= related.texture %>" style="--accent:<%= related.accent %>;">
+          <% if (related.image) { %>
+            <img class="product-visual__image" src="<%= related.image %>" alt="<%= related.name %>" loading="lazy" />
+          <% } %>
+        </div>
+      <div class="product-card__content">
+        <p class="eyebrow"><%= related.category_name %></p>
+        <h3><a href="/products/<%= related.slug %>"><%= related.name %></a></h3>
+        <p><%= related.tagline %></p>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('partials/footer') %>
+

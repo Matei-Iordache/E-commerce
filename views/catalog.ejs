@@ -1,0 +1,67 @@
+<%- include('partials/header', { title }) %>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Catalog de produse</p>
+    <h1><%= selectedCategory ? selectedCategory.name : 'Toate produsele' %></h1>
+    <p><%= selectedCategory ? selectedCategory.description : 'Navigheaza pe categorii sau cauta produse in catalog.' %></p>
+  </div>
+  <form class="search-form" method="get" action="/catalog">
+    <% if (selectedCategory) { %>
+      <input type="hidden" name="category" value="<%= selectedCategory.slug %>" />
+    <% } %>
+    <input type="search" name="q" placeholder="Cauta in catalog" value="<%= query %>" />
+    <button type="submit" class="button">Cauta</button>
+  </form>
+</section>
+
+<section class="filter-row">
+  <a class="chip <%= !selectedCategory ? 'chip--active' : '' %>" href="/catalog">Toate</a>
+  <% categories.forEach((category) => { %>
+    <a class="chip <%= selectedCategory && selectedCategory.slug === category.slug ? 'chip--active' : '' %>" href="/catalog?category=<%= category.slug %>"><%= category.name %></a>
+  <% }) %>
+</section>
+
+<section class="grid grid--products">
+  <% products.forEach((product) => { %>
+    <article class="product-card">
+      <div class="product-visual texture-<%= product.texture %>" style="--accent:<%= product.accent %>;">
+        <% if (product.image) { %>
+          <img class="product-visual__image" src="<%= product.image %>" alt="<%= product.name %>" loading="lazy" />
+        <% } %>
+        <% if (product.stock <= 5) { %>
+          <span class="badge badge--dark">Stoc mic</span>
+        <% } %>
+        <% if (product.promo_percent) { %>
+          <span class="badge">-<%= product.promo_percent %>%</span>
+        <% } %>
+      </div>
+      <div class="product-card__content">
+        <p class="eyebrow"><%= product.category_name %></p>
+        <h3><a href="/products/<%= product.slug %>"><%= product.name %></a></h3>
+        <p><%= product.tagline %></p>
+        <p>Stoc disponibil: <strong><%= product.stock %></strong></p>
+        <div class="price-row">
+          <strong><%= formatMoney(Math.round(product.price_cents * (1 - product.promo_percent / 100))) %></strong>
+          <% if (product.promo_percent) { %>
+            <span class="price-old"><%= formatMoney(product.price_cents) %></span>
+          <% } %>
+        </div>
+        <form action="/cart/add" method="post" class="inline-form">
+          <input type="hidden" name="productId" value="<%= product.id %>" />
+          <input type="hidden" name="redirectTo" value="/catalog<%= selectedCategory ? `?category=${selectedCategory.slug}` : '' %>" />
+          <button type="submit" class="button button--secondary">Adauga in cos</button>
+        </form>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<% if (!products.length) { %>
+  <section class="empty-state card">
+    <h2>Nu exista rezultate pentru filtrul curent.</h2>
+    <a class="button" href="/catalog">Reseteaza filtrarea</a>
+  </section>
+<% } %>
+
+<%- include('partials/footer') %>

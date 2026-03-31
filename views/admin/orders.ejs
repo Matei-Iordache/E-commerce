@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title }) %>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Admin comenzi</p>
+    <h1>Gestiune comenzi</h1>
+  </div>
+</section>
+
+<section class="card">
+  <div class="stack-list">
+    <% orders.forEach((order) => { %>
+      <form action="/admin/orders/<%= order.id %>/status" method="post" class="product-admin-row">
+        <div>
+          <strong><%= order.code %></strong>
+          <p><%= order.user_name %> - <%= formatMoney(order.total_cents) %></p>
+        </div>
+        <span><%= order.payment_status %></span>
+        <label>
+          Status
+          <select name="status">
+            <% ['Inregistrata', 'In procesare', 'Expediata', 'Finalizata'].forEach((status) => { %>
+              <option value="<%= status %>" <%= order.status === status ? 'selected' : '' %>><%= status %></option>
+            <% }) %>
+          </select>
+        </label>
+        <button type="submit" class="ghost-button">Salveaza</button>
+      </form>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

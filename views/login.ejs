@@ -1,0 +1,23 @@
+<%- include('partials/header', { title }) %>
+
+<section class="auth-shell">
+  <div class="card auth-card">
+    <p class="eyebrow">Autentificare</p>
+    <h1>Intra in cont</h1>
+    <form action="/login" method="post" class="stack-form">
+      <label>
+        Email
+        <input type="email" name="email" required />
+      </label>
+      <label>
+        Parola
+        <input type="password" name="password" required />
+      </label>
+      <button type="submit" class="button">Login</button>
+    </form>
+    <p>Demo client: <strong>client@gamegrid.ro</strong> / <strong>client123</strong></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+

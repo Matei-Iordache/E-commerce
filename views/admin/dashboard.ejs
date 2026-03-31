@@ -1,0 +1,65 @@
+<%- include('../partials/header', { title }) %>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Backoffice</p>
+    <h1>Administrare site</h1>
+    <p>Gestiune pentru catalog, utilizatori si comenzi.</p>
+  </div>
+</section>
+
+<section class="grid grid--stats">
+  <article class="card stat-card">
+    <span>Comenzi</span>
+    <strong><%= stats.orders %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Utilizatori</span>
+    <strong><%= stats.users %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Produse</span>
+    <strong><%= stats.products %></strong>
+  </article>
+  <article class="card stat-card">
+    <span>Venit incasat</span>
+    <strong><%= formatMoney(stats.revenueCents) %></strong>
+  </article>
+</section>
+
+<section class="admin-links">
+  <a class="button" href="/admin/products">Produse</a>
+  <a class="button button--secondary" href="/admin/orders">Comenzi</a>
+  <a class="button button--secondary" href="/admin/users">Utilizatori</a>
+</section>
+
+<section class="card">
+  <h2>Comenzi recente</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Cod</th>
+          <th>Client</th>
+          <th>Status</th>
+          <th>Plata</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recentOrders.forEach((order) => { %>
+          <tr>
+            <td><%= order.code %></td>
+            <td><%= order.user_name %></td>
+            <td><%= order.status %></td>
+            <td><%= order.payment_status %></td>
+            <td><%= formatMoney(order.total_cents) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>
+

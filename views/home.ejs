@@ -1,0 +1,105 @@
+<%- include('partials/header', { title }) %>
+
+<section class="hero-grid">
+  <div class="hero-copy card card--hero">
+    <p class="eyebrow">B2C game commerce</p>
+    <h1>Magazin online pentru jocuri PC, promotii si lansari hot.</h1>
+    <p>
+      GameGrid este un demo complet de site e-commerce: meniu, catalog pe categorii, produs, cos, comanda, stocuri,
+      factura, plata electronica demo si administrare.
+    </p>
+    <div class="hero-actions">
+      <a class="button" href="/catalog">Explora catalogul</a>
+      <a class="button button--secondary" href="/ritual-personalizat">Testeaza modulul original</a>
+    </div>
+    <div class="stats-row">
+      <article>
+        <strong>5</strong>
+        <span>categorii</span>
+      </article>
+      <article>
+        <strong>30+</strong>
+        <span>jocuri seed</span>
+      </article>
+      <article>
+        <strong>demo</strong>
+        <span>plata sandbox</span>
+      </article>
+    </div>
+  </div>
+  <div class="hero-panel card card--visual">
+    <div class="orb orb--one"></div>
+    <div class="orb orb--two"></div>
+    <div class="ritual-stack">
+      <span>RPG</span>
+      <span>FPS</span>
+      <span>Co-op</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Categorii</p>
+    <h2>Structura catalogului</h2>
+  </div>
+</section>
+
+<section class="grid grid--categories">
+  <% categoryHighlights.forEach((category) => { %>
+    <article class="card category-card">
+      <p class="eyebrow"><%= category.product_count %> produse</p>
+      <h3><%= category.name %></h3>
+      <p><%= category.description %></p>
+      <a href="/catalog?category=<%= category.slug %>">Vezi categoria</a>
+    </article>
+  <% }) %>
+</section>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Promotii si bestseller</p>
+    <h2>Produse recomandate</h2>
+  </div>
+</section>
+
+<section class="grid grid--products">
+  <% featuredProducts.forEach((product) => { %>
+    <article class="product-card">
+      <div class="product-visual texture-<%= product.texture %>" style="--accent:<%= product.accent %>;">
+        <% if (product.image) { %>
+          <img class="product-visual__image" src="<%= product.image %>" alt="<%= product.name %>" loading="lazy" />
+        <% } %>
+        <% if (product.promo_percent) { %>
+          <span class="badge">-<%= product.promo_percent %>%</span>
+        <% } %>
+        <span class="product-visual__label"><%= product.category_name %></span>
+      </div>
+      <div class="product-card__content">
+        <p class="eyebrow"><%= product.category_name %></p>
+        <h3><a href="/products/<%= product.slug %>"><%= product.name %></a></h3>
+        <p><%= product.tagline %></p>
+        <div class="price-row">
+          <strong><%= formatMoney(Math.round(product.price_cents * (1 - product.promo_percent / 100))) %></strong>
+          <% if (product.promo_percent) { %>
+            <span class="price-old"><%= formatMoney(product.price_cents) %></span>
+          <% } %>
+        </div>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<section class="feature-banner card">
+  <div>
+    <p class="eyebrow">Element de originalitate</p>
+    <h2>Loadout Personalizat</h2>
+    <p>
+      Modulul original al proiectului recomanda un mini-pachet de jocuri pe baza preferintelor de gameplay si bugetului,
+      apoi poate adauga automat bundle-ul in cos.
+    </p>
+  </div>
+  <a class="button" href="/ritual-personalizat">Porneste configuratorul</a>
+</section>
+
+<%- include('partials/footer') %>

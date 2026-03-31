@@ -1,0 +1,72 @@
+<%- include('partials/header', { title }) %>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Checkout</p>
+    <h1>Inregistrarea comenzii</h1>
+    <p>Fluxul creeaza comanda, emite factura si trimite clientul spre plata electronica demo.</p>
+  </div>
+</section>
+
+<section class="checkout-layout">
+  <div class="card">
+    <form action="/checkout" method="post" class="stack-form">
+      <label>
+        Nume destinatar
+        <input type="text" name="shippingName" value="<%= currentUser.name %>" required />
+      </label>
+      <label>
+        Email
+        <input type="email" name="shippingEmail" value="<%= currentUser.email %>" required />
+      </label>
+      <label>
+        Adresa
+        <textarea name="shippingAddress" rows="3" required></textarea>
+      </label>
+      <div class="form-row">
+        <label>
+          Oras
+          <input type="text" name="shippingCity" required />
+        </label>
+        <label>
+          Cod postal
+          <input type="text" name="shippingZip" required />
+        </label>
+      </div>
+      <label>
+        Observatii
+        <textarea name="notes" rows="3"></textarea>
+      </label>
+      <button type="submit" class="button">Inregistreaza comanda</button>
+    </form>
+  </div>
+
+  <aside class="card summary-card">
+    <h2>Produse comandate</h2>
+    <div class="stack-list">
+      <% cart.forEach((item) => { %>
+        <article class="mini-product">
+          <div class="mini-product__swatch texture-<%= item.texture %>" style="--accent:<%= item.accent %>;">
+            <% if (item.image) { %>
+              <img class="mini-product__image" src="<%= item.image %>" alt="<%= item.name %>" loading="lazy" />
+            <% } %>
+          </div>
+          <div>
+            <strong><%= item.name %></strong>
+            <p><%= item.quantity %> x <%= formatMoney(item.finalPriceCents) %></p>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+    <dl class="price-breakdown">
+      <div><dt>Subtotal brut</dt><dd><%= formatMoney(summary.baseSubtotalCents) %></dd></div>
+      <div><dt>Reduceri produse</dt><dd>- <%= formatMoney(summary.productDiscountCents) %></dd></div>
+      <div><dt>Reducere cupon</dt><dd>- <%= formatMoney(summary.couponDiscountCents) %></dd></div>
+      <div><dt>TVA 19%</dt><dd><%= formatMoney(summary.taxCents) %></dd></div>
+      <div class="price-breakdown__total"><dt>Total factura</dt><dd><%= formatMoney(summary.totalCents) %></dd></div>
+    </dl>
+  </aside>
+</section>
+
+<%- include('partials/footer') %>
+

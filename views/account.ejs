@@ -1,0 +1,51 @@
+<%- include('partials/header', { title }) %>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Zona client</p>
+    <h1>Bine ai revenit, <%= currentUser.name %></h1>
+    <p>Istoricul comenzilor plasate si acces rapid la facturi.</p>
+  </div>
+</section>
+
+<section class="card">
+  <% if (orders.length) { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cod</th>
+            <th>Status</th>
+            <th>Plata</th>
+            <th>Total</th>
+            <th>Actiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach((order) => { %>
+            <tr>
+              <td><%= order.code %></td>
+              <td><%= order.status %></td>
+              <td><%= order.payment_status %></td>
+              <td><%= formatMoney(order.total_cents) %></td>
+              <td>
+                <a href="/orders/<%= order.code %>/invoice">Factura</a>
+                <% if (order.payment_status !== 'Platita') { %>
+                  <a href="/checkout/<%= order.code %>/payment">Plata</a>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <h2>Nu exista comenzi inregistrate.</h2>
+      <a class="button" href="/catalog">Mergi la catalog</a>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>
+

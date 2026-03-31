@@ -1,0 +1,83 @@
+<%- include('partials/header', { title }) %>
+
+<section class="two-column">
+  <div class="card">
+    <p class="eyebrow">Personalizare</p>
+    <h1>Loadout Personalizat</h1>
+    <p>
+      Acesta este modulul reprezentativ de originalitate al site-ului. Recomanda jocuri pe baza tipului de experienta,
+      stilului de joc si bugetului, apoi construieste un mini-bundle gata de comandat.
+    </p>
+    <form action="/ritual-personalizat" method="post" class="stack-form">
+      <label>
+        Ce tip de experienta cauti?
+        <select name="concern">
+          <option value="story" <%= answers.concern === 'story' ? 'selected' : '' %>>Story-driven</option>
+          <option value="esports" <%= answers.concern === 'esports' ? 'selected' : '' %>>Competitive / esports</option>
+          <option value="co_op" <%= answers.concern === 'co_op' ? 'selected' : '' %>>Co-op cu prietenii</option>
+        </select>
+      </label>
+      <label>
+        Stil de sesiune
+        <select name="mood">
+          <option value="solo" <%= answers.mood === 'solo' ? 'selected' : '' %>>Solo focus</option>
+          <option value="ranked" <%= answers.mood === 'ranked' ? 'selected' : '' %>>Ranked grind</option>
+          <option value="chill" <%= answers.mood === 'chill' ? 'selected' : '' %>>Chill casual</option>
+        </select>
+      </label>
+      <label>
+        Buget disponibil
+        <select name="budget">
+          <option value="mic" <%= answers.budget === 'mic' ? 'selected' : '' %>>Sub 120 lei</option>
+          <option value="mediu" <%= !answers.budget || answers.budget === 'mediu' ? 'selected' : '' %>>120-220 lei</option>
+          <option value="premium" <%= answers.budget === 'premium' ? 'selected' : '' %>>Premium</option>
+        </select>
+      </label>
+      <button type="submit" class="button">Genereaza loadout</button>
+    </form>
+  </div>
+
+  <div class="card card--result">
+    <% if (result) { %>
+      <p class="eyebrow">Rezultat</p>
+      <h2>Recomandare personalizata</h2>
+      <p><%= result.message %></p>
+      <div class="stack-list">
+        <% result.recommendedProducts.forEach((product) => { %>
+          <article class="mini-product">
+            <div class="mini-product__swatch texture-<%= product.texture %>" style="--accent:<%= product.accent %>;">
+              <% if (product.image) { %>
+                <img class="mini-product__image" src="<%= product.image %>" alt="<%= product.name %>" loading="lazy" />
+              <% } %>
+            </div>
+            <div>
+              <strong><%= product.name %></strong>
+              <p><%= product.tagline %></p>
+              <span><%= formatMoney(Math.round(product.price_cents * (1 - product.promo_percent / 100))) %></span>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+      <div class="summary-strip">
+        <span>Total kit</span>
+        <strong><%= formatMoney(result.total) %></strong>
+      </div>
+      <form action="/ritual-personalizat/add-bundle" method="post">
+        <input type="hidden" name="productIds" value="<%= result.recommendedProducts.map((item) => item.id).join(',') %>" />
+        <button type="submit" class="button">Adauga loadout-ul in cos</button>
+      </form>
+    <% } else { %>
+      <p class="eyebrow">Flux</p>
+      <h2>Modul gata de testat</h2>
+      <p>Completeaza formularul si sistemul va alege automat jocuri compatibile din catalogul actual.</p>
+      <ul class="feature-list">
+        <li>citeste caracteristicile jocurilor din baza SQLite</li>
+        <li>compune un bundle in functie de buget</li>
+        <li>poate trimite selectia direct in cos</li>
+      </ul>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+

@@ -1,0 +1,26 @@
+<%- include('partials/header', { title }) %>
+
+<section class="auth-shell">
+  <div class="card auth-card">
+    <p class="eyebrow">Cont nou</p>
+    <h1>Creaza cont de client</h1>
+    <form action="/register" method="post" class="stack-form">
+      <label>
+        Nume complet
+        <input type="text" name="name" required />
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" required />
+      </label>
+      <label>
+        Parola
+        <input type="password" name="password" minlength="6" required />
+      </label>
+      <button type="submit" class="button">Creeaza cont</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+

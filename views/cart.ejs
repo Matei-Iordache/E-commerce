@@ -1,0 +1,83 @@
+<%- include('partials/header', { title }) %>
+
+<section class="section-head">
+  <div>
+    <p class="eyebrow">Cos de cumparaturi</p>
+    <h1>Revizuire si actualizare cos</h1>
+  </div>
+</section>
+
+<section class="checkout-layout">
+  <div class="card">
+    <% if (cart.length) { %>
+      <div class="cart-lines">
+        <% cart.forEach((item) => { %>
+          <article class="cart-line">
+            <div class="mini-product__swatch texture-<%= item.texture %>" style="--accent:<%= item.accent %>;">
+              <% if (item.image) { %>
+                <img class="mini-product__image" src="<%= item.image %>" alt="<%= item.name %>" loading="lazy" />
+              <% } %>
+            </div>
+            <div>
+              <strong><%= item.name %></strong>
+              <p><%= item.category_name %> - stoc <%= item.stock %></p>
+              <span><%= formatMoney(item.finalPriceCents) %> / buc</span>
+            </div>
+            <form action="/cart/update" method="post" class="inline-form">
+              <input type="hidden" name="productId" value="<%= item.id %>" />
+              <input type="number" name="quantity" value="<%= item.quantity %>" min="0" max="<%= item.stock %>" />
+              <button type="submit" class="ghost-button">Actualizeaza</button>
+            </form>
+            <strong><%= formatMoney(item.lineTotalCents) %></strong>
+            <form action="/cart/remove" method="post">
+              <input type="hidden" name="productId" value="<%= item.id %>" />
+              <button type="submit" class="ghost-button">Sterge</button>
+            </form>
+          </article>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <h2>Cosul este gol.</h2>
+        <a class="button" href="/catalog">Adauga produse</a>
+      </div>
+    <% } %>
+  </div>
+
+  <aside class="card summary-card">
+    <h2>Sumar</h2>
+    <dl class="price-breakdown">
+      <div><dt>Subtotal brut</dt><dd><%= formatMoney(summary.baseSubtotalCents) %></dd></div>
+      <div><dt>Reduceri produse</dt><dd>- <%= formatMoney(summary.productDiscountCents) %></dd></div>
+      <div><dt>Reducere cupon</dt><dd>- <%= formatMoney(summary.couponDiscountCents) %></dd></div>
+      <div><dt>TVA 19%</dt><dd><%= formatMoney(summary.taxCents) %></dd></div>
+      <div class="price-breakdown__total"><dt>Total</dt><dd><%= formatMoney(summary.totalCents) %></dd></div>
+    </dl>
+
+    <% if (cart.length) { %>
+      <% if (activeCoupon) { %>
+        <form action="/cart/coupon/remove" method="post" class="stack-form">
+          <p>Cupon activ: <strong><%= activeCoupon %></strong></p>
+          <button type="submit" class="ghost-button">Elimina cuponul</button>
+        </form>
+      <% } else { %>
+        <form action="/cart/coupon" method="post" class="stack-form">
+          <label>
+            Cod promotional
+            <input type="text" name="code" placeholder="GAME10" />
+          </label>
+          <button type="submit" class="button button--secondary">Aplica</button>
+        </form>
+      <% } %>
+      <a class="button" href="/checkout">Continua la checkout</a>
+    <% } %>
+    <div class="coupon-box">
+      <p class="eyebrow">Exemple cupoane</p>
+      <% Object.entries(couponDefinitions).forEach(([code, coupon]) => { %>
+        <p><strong><%= code %></strong> - <%= coupon.label %></p>
+      <% }) %>
+    </div>
+  </aside>
+</section>
+
+<%- include('partials/footer') %>

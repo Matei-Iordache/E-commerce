@@ -1,0 +1,75 @@
+<%- include('partials/header', { title }) %>
+
+<section class="invoice card">
+  <div class="invoice__header">
+    <div>
+      <p class="eyebrow">Factura fiscala demo</p>
+      <h1><%= order.code %></h1>
+      <p>Data emiterii: <%= new Date(order.created_at).toLocaleString('ro-RO') %></p>
+    </div>
+    <div class="invoice__status">
+      <span class="badge badge--dark"><%= order.payment_status %></span>
+      <span class="badge"><%= order.status %></span>
+    </div>
+  </div>
+
+  <div class="invoice__meta">
+    <div>
+      <h2>Furnizor</h2>
+      <p>GameGrid SRL</p>
+      <p>Bucuresti, Romania</p>
+      <p>CUI demo: 12345678</p>
+    </div>
+    <div>
+      <h2>Client</h2>
+      <p><%= order.shipping_name %></p>
+      <p><%= order.shipping_email %></p>
+      <p><%= order.shipping_address %>, <%= order.shipping_city %></p>
+      <p><%= order.shipping_zip %></p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Articol</th>
+          <th>Cant.</th>
+          <th>Pret unitar</th>
+          <th>Valoare</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach((item) => { %>
+          <tr>
+            <td><%= item.product_name %></td>
+            <td><%= item.quantity %></td>
+            <td><%= formatMoney(item.unit_price_cents) %></td>
+            <td><%= formatMoney(item.line_total_cents) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <dl class="price-breakdown invoice__totals">
+    <div><dt>Subtotal</dt><dd><%= formatMoney(order.subtotal_cents - order.product_discount_cents) %></dd></div>
+    <div><dt>Reduceri produse</dt><dd>- <%= formatMoney(order.product_discount_cents) %></dd></div>
+    <div><dt>Reduceri cupoane</dt><dd>- <%= formatMoney(order.coupon_discount_cents) %></dd></div>
+    <div><dt>TVA 19%</dt><dd><%= formatMoney(order.tax_cents) %></dd></div>
+    <div class="price-breakdown__total"><dt>Total de plata</dt><dd><%= formatMoney(order.total_cents) %></dd></div>
+  </dl>
+
+  <% if (payment) { %>
+    <div class="notice-box">
+      <p>Tranzactie: <strong><%= payment.transaction_ref %></strong></p>
+      <p>Gateway: <strong><%= payment.gateway %></strong></p>
+      <p>Card: **** **** **** <strong><%= payment.card_last4 %></strong></p>
+    </div>
+  <% } else { %>
+    <a class="button" href="/checkout/<%= order.code %>/payment">Mergi la plata</a>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>
+
