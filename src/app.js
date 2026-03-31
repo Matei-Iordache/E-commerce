@@ -22,20 +22,25 @@ const couponDefinitions = {
 };
 const stripeSecretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
+const isProduction = process.env.NODE_ENV === "production";
+const sessionSecret = String(process.env.SESSION_SECRET || "gamegrid-session-secret");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "views"));
+app.set("trust proxy", 1);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(
   session({
-    secret: "gamegrid-session-secret",
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "lax",
+      secure: isProduction,
     },
   })
 );

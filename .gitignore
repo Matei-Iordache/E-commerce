@@ -3,4 +3,5 @@ data/store.db
 data/store.db-shm
 data/store.db-wal
 secret/
+secret/stripe.env
 

@@ -1,8 +1,14 @@
+const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
 const bcrypt = require("bcryptjs");
 
-const dbPath = path.join(__dirname, "..", "data", "store.db");
+const configuredSqlitePath = String(process.env.SQLITE_PATH || "").trim();
+const configuredDataDir = String(process.env.DATA_DIR || "").trim();
+const resolvedDataDir = configuredDataDir ? path.resolve(configuredDataDir) : path.join(__dirname, "..", "data");
+const dbPath = configuredSqlitePath || path.join(resolvedDataDir, "store.db");
+
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 const db = new Database(dbPath);
 
 const steamImage = (appId) =>

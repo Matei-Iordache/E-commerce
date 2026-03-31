@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: gamegrid
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: APP_BASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    disk:
+      name: gamegrid-data
+      mountPath: /var/data
+      sizeGB: 1

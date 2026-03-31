@@ -83,3 +83,20 @@ Pasii:
 
 GitHub Pages NU poate rula backend Node.js/Express sau SQLite.
 Pentru aplicatia completa foloseste un hosting Node.js (Render/Railway/Fly.io/VPS).
+
+#### Deploy rapid pe Render (live domain)
+
+Repository-ul include `render.yaml` pentru deploy automat.
+
+1. In Render: **New + -> Blueprint** si conecteaza repository-ul.
+2. Confirmi crearea serviciului `gamegrid`.
+3. In serviciu, setezi variabilele:
+   - `APP_BASE_URL` = URL-ul Render (ex: `https://gamegrid.onrender.com`)
+   - `STRIPE_SECRET_KEY` = cheia ta Stripe (optional, doar daca vrei plata reala)
+4. Deploy.
+
+Detalii importante:
+
+- Aplicatia ruleaza pe domeniu live Render (`*.onrender.com`) si poti adauga ulterior custom domain.
+- SQLite este pastrat pe disk persistent la `/var/data` (nu se pierde la restart/redeploy).
+- Pentru Stripe, adauga si URL-ul live in dashboard-ul Stripe la allowed redirect URLs.
